@@ -4,18 +4,23 @@
 name:                yelp
 version:             0.1.0.0
 synopsis:            Bindings for the Yelp API.
--- description:         
 homepage:            http://github.com/mcschroeder/yelp-haskell
 license:             BSD3
 license-file:        LICENSE
 author:              Michael Schröder
 maintainer:          mcschroeder@gmail.com
--- copyright:           
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.8
 
+extra-source-files:
+  example.hs
+
 library
   exposed-modules:     Web.Yelp
-  -- other-modules:       
-  build-depends:       base ==4.5.*
+  build-depends:       base >= 4.5
+                     , transformers >= 0.3
+                     , bytestring >= 0.10
+                     , http-conduit >= 1.9
+  extensions:
+    GeneralizedNewtypeDeriving
