@@ -22,5 +22,14 @@ library
                      , transformers >= 0.3
                      , bytestring >= 0.10
                      , http-conduit >= 1.9
+                     , http-types >= 0.8
+                     , authenticate-oauth >= 1.4
+                     , conduit >= 1.0
   extensions:
     GeneralizedNewtypeDeriving
+    FlexibleInstances
+    MultiParamTypeClasses
+    UndecidableInstances
+    TypeFamilies
+    FlexibleContexts
+    OverloadedStrings

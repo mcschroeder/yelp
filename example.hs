@@ -14,5 +14,5 @@ creds = Y.Credentials { Y.consumerKey    = "your"
 main :: IO ()
 main = withManager $ \manager -> do
     Y.runYelpT creds manager $ do
-        c <- Y.getCreds
-        liftIO $ print c
+        res <- Y.search "food" "San Francisco"
+        liftIO $ print res
