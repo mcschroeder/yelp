@@ -17,14 +17,25 @@ extra-source-files:
   example.hs
 
 library
-  exposed-modules:     Web.Yelp
-  build-depends:       base >= 4.5
-                     , transformers >= 0.3
-                     , bytestring >= 0.10
-                     , http-conduit >= 1.9
-                     , http-types >= 0.8
-                     , authenticate-oauth >= 1.4
-                     , conduit >= 1.0
+  exposed-modules:     
+    Web.Yelp
+  other-modules:
+    Web.Yelp.Base
+    Web.Yelp.Monad
+    Web.Yelp.Search
+    Web.Yelp.Types
+  build-depends:       
+      base >= 4.5
+    , transformers >= 0.3
+    , bytestring >= 0.10
+    , http-conduit >= 1.9
+    , http-types >= 0.8
+    , authenticate-oauth >= 1.4
+    , conduit >= 1.0
+    , text >= 0.11
+    , resourcet >= 0.4
+    , monad-control >= 0.3
+    , transformers-base >= 0.4
   extensions:
     GeneralizedNewtypeDeriving
     FlexibleInstances
