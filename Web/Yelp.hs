@@ -10,6 +10,8 @@ module Web.Yelp
 
       -- * Yelp's Search API
     , search
+    , SearchResult(..)
+    , Business(..)
     ) where
 
 import Web.Yelp.Base

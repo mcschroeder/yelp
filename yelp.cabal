@@ -36,6 +36,8 @@ library
     , resourcet >= 0.4
     , monad-control >= 0.3
     , transformers-base >= 0.4
+    , aeson >= 0.6
+    , attoparsec-conduit >= 1.0
   extensions:
     GeneralizedNewtypeDeriving
     FlexibleInstances

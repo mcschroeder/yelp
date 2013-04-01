@@ -10,6 +10,7 @@ module Web.Yelp.Monad
     , runYelpT
     , getManager
     , getOAuth
+    , runResourceInY
 
       -- * Re-export
     , lift
@@ -26,6 +27,7 @@ import Control.Monad.Trans.Control ( MonadTransControl(..)
                                    , defaultRestoreM )
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Resource (MonadThrow, MonadResource)
+import qualified Data.Conduit as C
 import qualified Network.HTTP.Conduit as H
 import qualified Web.Authenticate.OAuth as OA
 
@@ -80,3 +82,10 @@ getManager = yManager `liftM` Y ask
 -- | Get OAuth related data.
 getOAuth :: Monad m => YelpT m (OA.OAuth, OA.Credential)
 getOAuth = yOAuth `liftM` Y ask
+
+-- | Run a 'ResourceT' inside a 'YelpT'.
+runResourceInY :: (C.MonadResource m, MonadBaseControl IO m) =>
+                  YelpT (C.ResourceT m) a
+               -> YelpT m a
+runResourceInY (Y inner) = Y $ ask >>= lift . C.runResourceT . runReaderT inner
+
