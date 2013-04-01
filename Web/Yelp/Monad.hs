@@ -8,7 +8,6 @@
 module Web.Yelp.Monad 
     ( YelpT
     , runYelpT
-    , getCreds
     , getManager
     , getOAuth
 
@@ -53,8 +52,7 @@ instance MonadBaseControl b m => MonadBaseControl b (YelpT m) where
     restoreM     = defaultRestoreM   unStMT
 
 -- | Internal data of 'YelpT'.
-data YData = YData { yCreds      :: Credentials 
-                   , yManager    :: H.Manager
+data YData = YData { yManager    :: H.Manager
                    , yOAuth      :: (OA.OAuth, OA.Credential)
                    }
 
@@ -65,7 +63,7 @@ runYelpT :: Credentials     -- ^ Your app's credentials.
          -> YelpT m a
          -> m a
 runYelpT creds manager (Y act) = 
-    runReaderT act (YData creds manager (credsToOAuth creds))
+    runReaderT act (YData manager (credsToOAuth creds))
 
 credsToOAuth :: Credentials -> (OA.OAuth, OA.Credential)
 credsToOAuth (Credentials ckey csec tok toksec) = 
@@ -75,14 +73,10 @@ credsToOAuth (Credentials ckey csec tok toksec) =
         oauthcreds = OA.newCredential tok toksec
     in (oauth, oauthcreds)
 
--- | Get your API credentials.
-getCreds :: Monad m => YelpT m Credentials
-getCreds = yCreds `liftM` Y ask
-
 -- | Get the 'H.Manager'.
 getManager :: Monad m => YelpT m H.Manager
 getManager = yManager `liftM` Y ask
 
+-- | Get OAuth related data.
 getOAuth :: Monad m => YelpT m (OA.OAuth, OA.Credential)
 getOAuth = yOAuth `liftM` Y ask
-
