@@ -10,8 +10,18 @@ module Web.Yelp
 
       -- * Yelp's Search API
     , search
+    , search'
     , SearchResult(..)
     , Business(..)
+    , Paging(..)
+    , SortOption(..)
+    , SearchFilter(..)
+    , Coordinates(..)
+    , LocationQuery(..)
+    , BoundingBox(..)
+    , SearchCoordinates(..)
+    , Neighbourhood(..)
+    , Locale(..)
     ) where
 
 import Web.Yelp.Base

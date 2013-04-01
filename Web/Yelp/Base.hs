@@ -26,11 +26,11 @@ import Web.Yelp.Monad
 import Web.Yelp.Types
 
 -- | A plain 'H.Request' to a Yelp API.
-yreq :: Monad m => Text -> HT.SimpleQuery -> YelpT m (H.Request n)
+yreq :: Monad m => Text -> HT.Query -> YelpT m (H.Request n)
 yreq path query = return
     H.def { H.host = "api.yelp.com"
           , H.path = encodeUtf8 path
-          , H.queryString = HT.renderSimpleQuery False query
+          , H.queryString = HT.renderQuery False query
           , H.responseTimeout = Just 120000000 -- 2 minutes
           }
 
