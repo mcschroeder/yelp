@@ -33,8 +33,8 @@ import qualified Web.Authenticate.OAuth as OA
 
 import Web.Yelp.Types
 
--- | @YelpT m a@ is a monad transformer containing 
--- information needed to use the Yelp API.
+-- | @YelpT m a@ is this library's monad transformer.
+-- Contains information needed to issue queries to Yelp.
 newtype YelpT m a = Y { unY :: ReaderT YData m a }
     deriving ( Functor, Applicative, Monad
              , MonadIO, MonadTrans

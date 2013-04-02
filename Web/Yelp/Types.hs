@@ -27,29 +27,29 @@ import qualified Network.HTTP.Types.QueryLike as HT
 
 
 -- | Yelp API access credentials.
-data Credentials = 
-    Credentials { consumerKey    :: ByteString
-                , consumerSecret :: ByteString
-                , token          :: ByteString
-                , tokenSecret    :: ByteString
-                } deriving (Show)
+data Credentials = Credentials 
+    { consumerKey    :: ByteString
+    , consumerSecret :: ByteString
+    , token          :: ByteString
+    , tokenSecret    :: ByteString
+    } deriving (Show)
 
-data SearchResult =
-	SearchResult { searchResultTotal      :: Integer
-				 , searchResultBusinesses :: [Business]
-				 } deriving (Show)
+data SearchResult = SearchResult 
+    { searchResultTotal      :: Integer
+    , searchResultBusinesses :: [Business]
+	} deriving (Show)
 
 instance A.FromJSON SearchResult where
 	parseJSON (A.Object v) =
 		SearchResult <$> v .: "total"
 					 <*> v .: "businesses"
 
-data Business = 
-	Business { businessId        :: Text 
-			 , businessIsClaimed :: Bool
-			 , businessIsClosed  :: Bool
-			 , businessName 	 :: Text
-			 } deriving (Show)
+data Business = Business 
+    { businessId        :: Text 
+    , businessIsClaimed :: Bool
+    , businessIsClosed  :: Bool
+    , businessName 	 :: Text
+    } deriving (Show)
 
 instance A.FromJSON Business where
 	parseJSON (A.Object v) =
@@ -59,16 +59,24 @@ instance A.FromJSON Business where
 				 <*> v .: "name"
 	parseJSON _ = mzero
 
+-- | Results will be localized in the region format and language if supported.
+data Locale = Locale 
+    { -- | ISO 3166-1 alpha-2 country code. 
+      -- Default country to use when parsing the location field. 
+      -- United States = US, Canada = CA, United Kingdom = GB (not UK).
+      countryCode :: Text
 
-data Locale = Locale { countryCode      :: Text
-                     , language         :: Text
-                     , filterByLanguage :: Bool
-                     } deriving (Show)
+      -- | ISO 639 language code.
+      -- Reviews written in the specified language will be shown.
+    , language :: Text
+
+      -- | Whether to filter business reviews by the specified language
+    , filterByLanguage :: Bool
+    } deriving (Show)
 
 instance HT.QueryLike Locale where
 	toQuery (Locale cc lang lang_filter) =
 		["cc" .= cc, "lang" .= lang, "lang_filter" .= lang_filter]
-
 
 -- | Constructs a 'HT.QueryItem' from a key and a 'HT.QueryValueLike' value.
 (.=) :: (HT.QueryValueLike v) => ByteString -> v -> HT.QueryItem
