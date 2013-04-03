@@ -21,6 +21,7 @@ library
     Web.Yelp
   other-modules:
     Web.Yelp.Base
+    Web.Yelp.Business
     Web.Yelp.Monad
     Web.Yelp.Search
     Web.Yelp.Types

@@ -27,6 +27,7 @@ import Control.Monad.Trans.Control ( MonadTransControl(..)
                                    , defaultRestoreM )
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Resource (MonadThrow, MonadResource)
+
 import qualified Data.Conduit as C
 import qualified Network.HTTP.Conduit as H
 import qualified Web.Authenticate.OAuth as OA

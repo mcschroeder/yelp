@@ -3,44 +3,42 @@
 
 module Web.Yelp.Search
     ( search
-    , search'
-    
     , Paging(..)
     , SortOption(..)
     , SearchFilter(..)
     , LocationQuery(..)
     , BoundingBox(..)
     , SearchCoordinates(..)
-    , Neighbourhood(..)
+    , Neighbourhood(..)    
+    , SearchResult(..)
+    , Region(..)
+    , CoordinateSpan(..)
     ) where
 
+import Control.Applicative
+import Control.Monad (mzero)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad.Trans.Resource (MonadResource)
+import Data.Aeson ((.:),(.:?))
 import Data.ByteString (ByteString)
-import qualified Network.HTTP.Types as HT
-import qualified Network.HTTP.Types.QueryLike as HT
+import Data.Maybe
+import Data.Text (Text)
 
+import qualified Data.Aeson as A
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
-
-import Data.Maybe
-import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Network.HTTP.Types as HT
+import qualified Network.HTTP.Types.QueryLike as HT
 
 import Web.Yelp.Base
+import Web.Yelp.Business
 import Web.Yelp.Monad
 import Web.Yelp.Types
 
-search :: (MonadResource m, MonadBaseControl IO m) => 
-           HT.Query 
-        -> YelpT m SearchResult
-search query = 
-    runResourceInY $ asJson =<< yhttp =<< yreq "/v2/search" query
-
-
 -- | Search for local businesses.
-search' :: (MonadResource m, MonadBaseControl IO m) =>
+search :: (MonadResource m, MonadBaseControl IO m) =>
           LocationQuery 
        -> Maybe Text        -- ^ Optional search term
        -> Maybe Paging
@@ -48,13 +46,14 @@ search' :: (MonadResource m, MonadBaseControl IO m) =>
        -> SearchFilter
        -> Maybe Locale 
        -> YelpT m SearchResult
-search' location term paging options sfilter locale =
-    search $ HT.toQuery location 
-          ++ HT.toQuery (fmap ("term" .=) term)
-          ++ HT.toQuery paging
-          ++ HT.toQuery options
-          ++ HT.toQuery sfilter
-          ++ HT.toQuery locale
+search location term paging options sfilter locale =
+    getObject "/v2/search" $ HT.toQuery location 
+                          ++ HT.toQuery (fmap ("term" .=) term)
+                          ++ HT.toQuery paging
+                          ++ HT.toQuery options
+                          ++ HT.toQuery sfilter
+                          ++ HT.toQuery locale
+
 
 data Paging = Paging 
     { pagingLimit :: Integer   -- ^ Number of results to return
@@ -63,6 +62,7 @@ data Paging = Paging
 
 instance HT.QueryLike Paging where
     toQuery (Paging limit offset) = ["limit" .= limit, "offset" .= offset]
+
 
 -- | Sort mode used when searching.
 -- 
@@ -82,6 +82,7 @@ instance HT.QueryLike SortOption where
     toQuery SortByMatch    = [("sort", Just "0")]
     toQuery SortByDistance = [("sort", Just "1")]
     toQuery SortByRating   = [("sort", Just "2")]
+
 
 -- | Additional constraints to filter the search results with.
 data SearchFilter = SearchFilter 
@@ -116,6 +117,7 @@ instance HT.QueryLike LocationQuery where
     toQuery (CoordinateQuery q)    = HT.toQuery q
     toQuery (NeighbourhoodQuery q) = HT.toQuery q
 
+
 -- | Location specified by a geographical bounding box, 
 -- defined by southwest and northeast coordinates.
 data BoundingBox = BoundingBox 
@@ -126,6 +128,7 @@ data BoundingBox = BoundingBox
 instance HT.QueryLike BoundingBox where
     toQuery (BoundingBox sw ne) =
         ["bounds" .= B.concat [coordsAsBS sw, "|", coordsAsBS ne]]
+
 
 -- | Location specified by geographic coordinates.
 data SearchCoordinates = SearchCoordinates 
@@ -140,6 +143,7 @@ instance HT.QueryLike SearchCoordinates where
         [("ll", Just params)] 
         where params = B.intercalate "," $ map (BC.pack . show) $ 
                        [lat,lon] ++ catMaybes [acc,alt,altacc]
+
 
 -- | Location specified by a particular neighbourhood, address or city.
 data Neighbourhood = Neighbourhood 
@@ -157,3 +161,43 @@ instance HT.QueryLike Neighbourhood where
         where cll = case coords of
                         Nothing -> []
                         Just cs -> ["cll" .= coordsAsBS cs]
+
+
+data SearchResult = SearchResult 
+    { searchResultRegion     :: Region
+    , searchResultTotal      :: Integer  -- ^ Total number of business results
+    , searchResultBusinesses :: [Business]
+    } deriving (Show)
+
+instance A.FromJSON SearchResult where
+    parseJSON (A.Object v) =
+        SearchResult <$> v .: "region"
+                     <*> v .: "total"
+                     <*> v .: "businesses"
+    parseJSON _ = mzero
+
+
+-- | Suggested bounds in a map to display results in
+data Region = Region
+    { regionSpan   :: CoordinateSpan -- ^ Span of suggested map bounds
+    , regionCenter :: Coordinates    -- ^ Center position of map bounds
+    } deriving (Show)
+
+instance A.FromJSON Region where
+    parseJSON (A.Object v) =
+        Region <$> v .: "span"
+               <*> v .: "center"
+    parseJSON _ = mzero
+
+
+-- | Defines the area spanned by a map region
+data CoordinateSpan = CoordinateSpan
+    { latitudeDelta  :: Double
+    , longitudeDelta :: Double
+    } deriving (Show)
+
+instance A.FromJSON CoordinateSpan where
+    parseJSON (A.Object v) =
+        CoordinateSpan <$> v .: "latitude_delta"
+                       <*> v .: "longitude_delta"
+    parseJSON _ = mzero

@@ -3,35 +3,45 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Web.Yelp.Base
-	( yreq
+	( getObject
+    , yreq
 	, yhttp
     , asJson
 	, asBS
     , YelpException(..)
 	) where
 
-import Data.Typeable (Typeable)
 import Control.Applicative
 import Control.Monad (mzero)
-import qualified Control.Exception.Lifted as E
 import Control.Monad.Trans.Class (MonadTrans)
 import Control.Monad.Trans.Control (MonadBaseControl)
-import Data.Aeson as A
 import Data.Aeson ((.:),(.:?))
 import Data.ByteString (ByteString)
+import Data.Text (Text)
+import Data.Text.Encoding (encodeUtf8)
+import Data.Typeable (Typeable)
+
+import qualified Control.Exception.Lifted as E
+import qualified Data.Aeson as A
 import qualified Data.ByteString as B
 import qualified Data.Conduit as C
 import qualified Data.Conduit.Attoparsec as C
 import qualified Data.Conduit.List as CL
-import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Text.Encoding (encodeUtf8)
 import qualified Network.HTTP.Conduit as H
 import qualified Network.HTTP.Types as HT
 import qualified Web.Authenticate.OAuth as OA
 
 import Web.Yelp.Monad
 import Web.Yelp.Types
+
+-- | Make a raw @GET@ request to Yelp's API.
+getObject :: (C.MonadResource m, C.MonadBaseControl IO m, A.FromJSON a) =>
+             Text   -- ^ Path (should begin with a slash @\/@)
+          -> HT.Query
+          -> YelpT m a
+getObject path query =
+    runResourceInY $ asJson =<< yhttp =<< yreq path query
 
 -- | A plain 'H.Request' to a Yelp API.
 yreq :: Monad m => Text -> HT.Query -> YelpT m (H.Request n)
@@ -72,6 +82,7 @@ isOkay status =
     let sc = HT.statusCode status
     in 200 <= sc && sc < 300
 
+-- | Converts a plain 'H.Response' coming from 'H.http' into a JSON value.
 asJson :: (MonadTrans t, C.MonadThrow m, A.FromJSON a) =>
           H.Response (C.ResumableSource m ByteString)
        -> t m a
@@ -89,6 +100,7 @@ asJsonHelper response = do
             [ "Yelp.Base.asJson: could not parse Yelp's response "
             , "(", T.pack str, ")" ]
 
+-- | Converts a plain 'H.Response' into a 'ByteString'.
 asBS :: Monad m =>
         H.Response (C.ResumableSource m ByteString)
      -> YelpT m ByteString

@@ -5,32 +5,45 @@ module Web.Yelp
       YelpT
     , runYelpT
 
-      -- * Authorization and Authentication
+      -- * Authentication
     , Credentials(..)
 
       -- * Yelp's Search API
+      -- ** Request
     , search
-    , search'
-    , SearchResult(..)
-    , Business(..)
-    , Paging(..)
-    , SortOption(..)
-    , SearchFilter(..)
-    , Coordinates(..)
     , LocationQuery(..)
     , BoundingBox(..)
     , SearchCoordinates(..)
     , Neighbourhood(..)
-    , Locale(..)
+    , Paging(..)
+    , SortOption(..)
+    , SearchFilter(..)
+      -- ** Response
+    , SearchResult(..)
     , Region(..)
-    , Location(..)
     , CoordinateSpan(..)
+
+      -- * Yelp's Business API
+      -- ** Request
+    , getBusiness
+    , BusinessId
+      -- ** Response
+    , Business(..)
+    , Location(..)
+
+      -- * Common Types
+    , Locale(..)
+    , Coordinates(..)
+
+      -- * Raw API access
+    , getObject
 
       -- * Exceptions
     , YelpException(..)
     ) where
 
 import Web.Yelp.Base
+import Web.Yelp.Business
 import Web.Yelp.Monad
 import Web.Yelp.Search
 import Web.Yelp.Types
