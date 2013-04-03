@@ -3,13 +3,13 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Web.Yelp.Base
-	( getObject
+    ( getObject
     , yreq
-	, yhttp
+    , yhttp
     , asJson
-	, asBS
+    , asBS
     , YelpException(..)
-	) where
+    ) where
 
 import Control.Applicative
 import Control.Monad (mzero)
