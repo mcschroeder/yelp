@@ -25,6 +25,9 @@ module Web.Yelp
     , Region(..)
     , Location(..)
     , CoordinateSpan(..)
+
+      -- * Exceptions
+    , YelpException(..)
     ) where
 
 import Web.Yelp.Base

@@ -26,6 +26,7 @@ library
     Web.Yelp.Types
   build-depends:       
       base >= 4.5
+    , lifted-base >= 0.2
     , transformers >= 0.3
     , bytestring >= 0.10
     , http-conduit >= 1.9
@@ -46,3 +47,5 @@ library
     TypeFamilies
     FlexibleContexts
     OverloadedStrings
+    DeriveDataTypeable
+
