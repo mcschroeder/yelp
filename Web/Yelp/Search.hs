@@ -8,7 +8,6 @@ module Web.Yelp.Search
     , Paging(..)
     , SortOption(..)
     , SearchFilter(..)
-    , Coordinates(..)
     , LocationQuery(..)
     , BoundingBox(..)
     , SearchCoordinates(..)
@@ -105,18 +104,6 @@ instance HT.QueryLike SearchFilter where
               radius' = fmap ("radius_filter" .=) radius
               deals'  = if deals then Just ("deals_filter" .= True)
                         else Nothing
-
-
--- | Geographical coordinates
-data Coordinates = Coordinates 
-    { latitude  :: Double
-    , longitude :: Double
-    } deriving (Show)
-
--- | Returns a 'ByteString' of the form @\"latitude,longitude\"@.
-coordsAsBS :: Coordinates -> ByteString
-coordsAsBS (Coordinates lat lon) = 
-    B.intercalate "," $ map (BC.pack . show) [lat,lon]
 
 
 -- | Method of specifying location in a search.

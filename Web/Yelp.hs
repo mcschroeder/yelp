@@ -22,6 +22,9 @@ module Web.Yelp
     , SearchCoordinates(..)
     , Neighbourhood(..)
     , Locale(..)
+    , Region(..)
+    , Location(..)
+    , CoordinateSpan(..)
     ) where
 
 import Web.Yelp.Base
