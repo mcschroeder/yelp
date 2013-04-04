@@ -55,7 +55,7 @@ data Business = Business
       -- | Whether business has been (permanently) closed
     , businessIsClosed :: Bool
     , businessName :: Text
-    , businessImageUrl :: Text
+    , businessImageUrl :: Maybe Text
     , businessUrl :: Text
     , businessMobileUrl :: Text
 
@@ -96,7 +96,7 @@ instance A.FromJSON Business where
                  <*> v .:  "is_claimed"
                  <*> v .:  "is_closed"
                  <*> v .:  "name"
-                 <*> v .:  "image_url"
+                 <*> v .:? "image_url"
                  <*> v .:  "url"
                  <*> v .:  "mobile_url"
                  <*> v .:? "phone"
