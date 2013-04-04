@@ -79,7 +79,7 @@ search location term paging options sfilter locale =
 data Paging = Paging 
     { pagingLimit :: Integer   -- ^ Number of results to return
     , pagingOffset :: Integer  -- ^ Offset the list of results by this amount
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike Paging where
     toQuery (Paging limit offset) = ["limit" .= limit, "offset" .= offset]
@@ -94,6 +94,7 @@ instance HT.QueryLike Paging where
 -- of ratings, similar to a bayesian average. This is so a business with 
 -- 1 rating of 5 stars doesn't immediately jump to the top.
 data SortOption = SortByMatch | SortByDistance | SortByRating
+                  deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike SortOption where
     toQuery SortByMatch    = [("sort", Just "0")]
@@ -112,7 +113,7 @@ data SearchFilter = SearchFilter
     
       -- | Whether to exclusively search for businesses with deals
     , filterDeals :: Bool
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike SearchFilter where
     toQuery (SearchFilter cs radius deals) =
@@ -140,7 +141,7 @@ instance HT.QueryLike LocationQuery where
 data BoundingBox = BoundingBox 
     { boundingBoxSWCoordinates :: Coordinates  -- ^ Southwest corner
     , boundingBoxNECoordinates :: Coordinates  -- ^ Northeast corner
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike BoundingBox where
     toQuery (BoundingBox sw ne) =
@@ -153,7 +154,7 @@ data SearchCoordinates = SearchCoordinates
     , searchCoordAccuracy         :: Maybe Double  -- ^ Accuracy of coordinates
     , searchCoordAltitude         :: Maybe Double  -- ^ Altitude
     , searchCoordAltitudeAccuracy :: Maybe Double  -- ^ Accuracy of altitude
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike SearchCoordinates where
     toQuery (SearchCoordinates (Coordinates lat lon) acc alt altacc) = 
@@ -170,7 +171,7 @@ data Neighbourhood = Neighbourhood
 
       -- | Optional hint to the geocoder to disambiguate the location text
     , neighbourhoodCoordinates :: Maybe Coordinates
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike Neighbourhood where
     toQuery (Neighbourhood location coords) =
@@ -185,7 +186,7 @@ data SearchResult = SearchResult
     { searchResultRegion     :: Region
     , searchResultTotal      :: Integer  -- ^ Total number of business results
     , searchResultBusinesses :: [Business]
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON SearchResult where
     parseJSON (A.Object v) =
@@ -199,7 +200,7 @@ instance A.FromJSON SearchResult where
 data Region = Region
     { regionSpan   :: CoordinateSpan -- ^ Span of suggested map bounds
     , regionCenter :: Coordinates    -- ^ Center position of map bounds
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Region where
     parseJSON (A.Object v) =
@@ -212,7 +213,7 @@ instance A.FromJSON Region where
 data CoordinateSpan = CoordinateSpan
     { latitudeDelta  :: Double
     , longitudeDelta :: Double
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON CoordinateSpan where
     parseJSON (A.Object v) =

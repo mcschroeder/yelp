@@ -29,14 +29,14 @@ data Credentials = Credentials
     , consumerSecret :: ByteString
     , token          :: ByteString
     , tokenSecret    :: ByteString
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 
 -- | Geographical coordinates
 data Coordinates = Coordinates 
     { latitude  :: Double
     , longitude :: Double
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Coordinates where
     parseJSON (A.Object v) =
@@ -63,7 +63,7 @@ data Locale = Locale
 
       -- | Whether to filter business reviews by the specified language
     , filterByLanguage :: Bool
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance HT.QueryLike Locale where
     toQuery (Locale cc lang lang_filter) =

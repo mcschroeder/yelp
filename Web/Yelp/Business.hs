@@ -88,7 +88,7 @@ data Business = Business
 
       -- | Up to 3 review snippets
     , businessReviews          :: [Review]
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Business where
     parseJSON (A.Object v) =
@@ -136,7 +136,7 @@ data Location = Location
       -- the latitude / longitude was determined in the geocoder. 
       -- These correspond to Google's GGeoAddressAccuracy field.
     , locationGeoAccuracy :: Integer
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Location where
     parseJSON (A.Object v) =
@@ -166,7 +166,7 @@ data Deal = Deal
     , dealImportantRestrictions  :: Maybe Text
     , dealAdditionalRestrictions :: Text
     , dealOptions                :: [DealOption]
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Deal where
     parseJSON (A.Object v) =
@@ -194,7 +194,7 @@ data DealOption = DealOption
       -- | The remaining deal options available for purchase
       -- ('Nothing' if the deal is unlimited)
     , dealOptionRemainingQuantity :: Maybe Integer
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON DealOption where
     parseJSON (A.Object v) =
@@ -217,7 +217,7 @@ data GiftCertificate = GiftCertificate
       -- | Whether unused balances are returned as cash or store credit
     , giftCertificateUnusedBalances :: Text
     , giftCertificateOptions :: [Price]
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON GiftCertificate where
     parseJSON (A.Object v) =
@@ -234,7 +234,7 @@ instance A.FromJSON GiftCertificate where
 data Price = Price
     { price          :: Double  -- ^ Price in cents
     , formattedPrice :: Text    -- ^ Formatted price, e.g. @$6@
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Price where
     parseJSON (A.Object v) =
@@ -249,7 +249,7 @@ data Review = Review
     , reviewExcerpt     :: Text
     , reviewTimeCreated :: Integer  -- ^ Unix timestamp
     , reviewUser        :: User  -- ^ User who wrote the review
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON Review where
     parseJSON (A.Object v) =
@@ -270,7 +270,7 @@ data Rating = Rating
     , ratingImageUrl      :: Text    -- ^ Size = 84 x 17 px
     , ratingImageUrlSmall :: Text    -- ^ Size = 50 x 10 px
     , ratingImageUrlLarge :: Text    -- ^ Size = 166 x 30 px
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 
 -- | A registered Yelp user.
@@ -278,7 +278,7 @@ data User = User
     { userId       :: Text
     , userImageUrl :: Text
     , userName     :: Text
-    } deriving (Show)
+    } deriving (Eq, Ord, Show, Read)
 
 instance A.FromJSON User where
     parseJSON (A.Object v) =
