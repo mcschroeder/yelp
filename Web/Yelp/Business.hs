@@ -130,7 +130,7 @@ instance A.FromJSON Business where
                  <*> v .:? "snippet_image_url"
                  <*> v .:  "location"
                  <*> v .:? "deals" .!= []
-                 <*> v .:? "gitf_certificates" .!= []
+                 <*> v .:? "gift_certificates" .!= []
                  <*> v .:? "reviews" .!= []
     parseJSON _ = mzero
 
