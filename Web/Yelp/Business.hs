@@ -24,6 +24,7 @@ import Data.Text (Text)
 
 import qualified Data.Aeson as A
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import qualified Network.HTTP.Types as HT
 import qualified Network.HTTP.Types.QueryLike as HT
 
@@ -37,7 +38,9 @@ getBusiness :: (MonadResource m, MonadBaseControl IO m) =>
             -> Maybe Locale
             -> YelpT m Business
 getBusiness bid locale = 
-    getObject ("/v2/business/" `T.append` bid) (HT.toQuery locale)
+    -- the business id (but not the rest of the path!) needs to be urlencoded
+    let bid' = (TE.decodeUtf8 . HT.urlEncode False . TE.encodeUtf8) bid in
+    getObject ("/v2/business/" `T.append` bid') (HT.toQuery locale)
 
 
 -- | ID of a business on Yelp.
