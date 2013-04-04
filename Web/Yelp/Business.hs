@@ -165,7 +165,7 @@ instance A.FromJSON Location where
                  <*> v .:? "postal_code"
                  <*> v .:  "country_code"
                  <*> v .:? "cross_streets"
-                 <*> v .:  "neighborhoods"
+                 <*> v .:? "neighborhoods" .!= []
                  <*> v .:  "display_address"
                  <*> v .:  "geo_accuracy"
 
