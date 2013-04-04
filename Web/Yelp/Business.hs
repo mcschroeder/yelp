@@ -44,42 +44,34 @@ getBusiness bid locale =
 type BusinessId = Text
 
 -- | A business registered on Yelp.
+--
+-- Note that the list of reviews is only populated by a 'getBusiness' request.
 data Business = Business 
-    { -- | Yelp ID for this business
-      businessId :: BusinessId
+    { businessId :: BusinessId
 
       -- | Whether business has been claimed by a business owner
     , businessIsClaimed :: Bool
 
       -- | Whether business has been (permanently) closed
     , businessIsClosed :: Bool
-
-      -- | Name of this business
     , businessName :: Text
-
-      -- | URL of photo for this business
     , businessImageUrl :: Text
-
-      -- | URL for business page on Yelp
     , businessUrl :: Text
-
-      -- | URL for mobile business page on Yelp
     , businessMobileUrl :: Text
 
-      -- | Phone number for this business with international dialing code 
-      -- (e.g. +442079460000)
+      -- | Phone number with international dialing code (e.g. @+442079460000@)
     , businessPhone :: Maybe Text
 
-      -- | Phone number for this business formatted for display
+      -- | Phone number formatted for display
     , businessDisplayPhone :: Maybe Text
 
-      -- | Number of reviews for this business
+      -- | Number of total reviews for this business
     , businessReviewCount :: Integer
 
       -- | Provides a list of @(category name, alias)@ pairs 
       -- that this business is associated with.
-      -- For example, @[["Local Flavor", "localflavor"], 
-      -- ["Active Life", "active"], ["Mass Media", "massmedia"]]@
+      -- For example, @[(\"Local Flavor\", \"localflavor\"), 
+      -- (\"Active Life\", \"active\"), (\"Mass Media\", \"massmedia\")]@
       -- This alias is provided so you can use it with 'SearchFilter'.
     , businessCategories :: [(Text,Text)]
 
@@ -87,25 +79,15 @@ data Business = Business
       -- if a latitude/longitude is specified.
     , businessDistance :: Maybe Double
 
-      -- | Rating for this business
-    , businessRating :: Rating
-
-      -- | Snippet text associated with this business
-    , businessSnippetText :: Maybe Text
-
-      -- | URL of snippet image associated with this business
-    , businessSnippetImageUrl :: Maybe Text
-
-      -- | Location data for this business
-    , businessLocation :: Location
-
-      -- Deal info for this business
-    , businessDeals :: [Deal]
-
-      -- Gift certificate info for this business
+    , businessRating           :: Rating
+    , businessSnippetText      :: Maybe Text
+    , businessSnippetImageUrl  :: Maybe Text
+    , businessLocation         :: Location
+    , businessDeals            :: [Deal]
     , businessGiftCertificates :: [GiftCertificate]
 
-    , businessReviews :: [Review]
+      -- | Up to 3 review snippets
+    , businessReviews          :: [Review]
     } deriving (Show)
 
 instance A.FromJSON Business where
@@ -135,7 +117,7 @@ instance A.FromJSON Business where
     parseJSON _ = mzero
 
 
--- | Location data for a business
+-- | Location data for a business.
 data Location = Location
     { locationCoordinates    :: Coordinates
     , locationAddress        :: [Text]
@@ -170,7 +152,7 @@ instance A.FromJSON Location where
                  <*> v .:  "geo_accuracy"
 
 
--- | Deal data for a business
+-- | Deal data for a business.
 data Deal = Deal
     { dealId                     :: Text
     , dealTitle                  :: Text
@@ -202,7 +184,7 @@ instance A.FromJSON Deal where
              <*> v .:  "options"
 
 
--- | Deal option
+-- | A deal option, as part of a 'Deal'.
 data DealOption = DealOption
     { dealOptionTitle         :: Text
     , dealOptionPurchaseUrl   :: Text
@@ -225,6 +207,7 @@ instance A.FromJSON DealOption where
                    <*> v .:? "remaining_count"
 
 
+-- | Gift certificate for a business.
 data GiftCertificate = GiftCertificate
     { giftCertificateId :: Text
     , giftCertificateUrl :: Text
@@ -246,6 +229,8 @@ instance A.FromJSON GiftCertificate where
                         <*> v .: "options"
 
 
+-- | A price (e.g. for a deal or gift certificate), 
+-- including a display representation.
 data Price = Price
     { price          :: Double  -- ^ Price in cents
     , formattedPrice :: Text    -- ^ Formatted price, e.g. @$6@
@@ -257,7 +242,7 @@ instance A.FromJSON Price where
               <*> v .: "formatted_price"
 
 
--- | Business review
+-- | A review of a business.
 data Review = Review
     { reviewId          :: Text
     , reviewRating      :: Rating
@@ -278,23 +263,17 @@ instance A.FromJSON Review where
                <*> v .: "user"
 
 
--- | Rating for a business
+-- | A rating for a business, 
+-- including URLs that point to the appropriate star rating image.
 data Rating = Rating
-    { -- | Rating from 1-5
-      rating :: Double
-
-      -- | URL to star rating image (size = 84x17)
-    , ratingImageUrl :: Text
-      
-      -- | URL to small version of rating image (size = 50x10)
-    , ratingImageUrlSmall :: Text
-      
-      -- | URL to large version of rating image (size = 166x30)
-    , ratingImageUrlLarge :: Text
+    { rating              :: Double  -- ^ Rating from 1 to 5
+    , ratingImageUrl      :: Text    -- ^ Size = 84 x 17 px
+    , ratingImageUrlSmall :: Text    -- ^ Size = 50 x 10 px
+    , ratingImageUrlLarge :: Text    -- ^ Size = 166 x 30 px
     } deriving (Show)
 
 
--- | Yelp user
+-- | A registered Yelp user.
 data User = User
     { userId       :: Text
     , userImageUrl :: Text

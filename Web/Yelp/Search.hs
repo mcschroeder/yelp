@@ -68,6 +68,14 @@ search location term paging options sfilter locale =
                           ++ HT.toQuery locale
 
 
+-- | You can use this data structure to limit the amount of results
+-- returned by a search and to offset into the total result list
+-- (i.e. you can request results "page-by-page".)
+--
+-- The maximum number of results you can retrieve at once is 20.
+-- 
+-- Using the offset you can request up to and including the 1000th result, 
+-- except when sorting by distance or rating, which limits you to 40 results.
 data Paging = Paging 
     { pagingLimit :: Integer   -- ^ Number of results to return
     , pagingOffset :: Integer  -- ^ Offset the list of results by this amount
@@ -78,10 +86,6 @@ instance HT.QueryLike Paging where
 
 
 -- | Sort mode used when searching.
--- 
--- If the mode is 'SortByDistance' or 'SortByRating' a search may retrieve 
--- an additional 20 businesses past the initial limit of the first 20 results. 
--- This is done by specifying a 'Paging' with an offset and limit of 20.
 -- 
 -- Sort by distance is only supported for a location or geographic search. 
 --
@@ -131,7 +135,7 @@ instance HT.QueryLike LocationQuery where
     toQuery (NeighbourhoodQuery q) = HT.toQuery q
 
 
--- | Location specified by a geographical bounding box, 
+-- | A location that is specified by a geographical bounding box, 
 -- defined by southwest and northeast coordinates.
 data BoundingBox = BoundingBox 
     { boundingBoxSWCoordinates :: Coordinates  -- ^ Southwest corner
@@ -143,7 +147,7 @@ instance HT.QueryLike BoundingBox where
         ["bounds" .= B.concat [coordsAsBS sw, "|", coordsAsBS ne]]
 
 
--- | Location specified by geographic coordinates.
+-- | A location that is specified by geographic coordinates.
 data SearchCoordinates = SearchCoordinates 
     { searchCoordinates           :: Coordinates   -- ^ Geo-point to search near
     , searchCoordAccuracy         :: Maybe Double  -- ^ Accuracy of coordinates
@@ -158,7 +162,7 @@ instance HT.QueryLike SearchCoordinates where
                        [lat,lon] ++ catMaybes [acc,alt,altacc]
 
 
--- | Location specified by a particular neighbourhood, address or city.
+-- | A location specified by a particular neighbourhood, address or city.
 data Neighbourhood = Neighbourhood 
     { -- | Combination of \"address, neighbourhood, city, state or zip, 
       -- optional country\"
@@ -176,6 +180,7 @@ instance HT.QueryLike Neighbourhood where
                         Just cs -> ["cll" .= coordsAsBS cs]
 
 
+-- | The results of a search request.
 data SearchResult = SearchResult 
     { searchResultRegion     :: Region
     , searchResultTotal      :: Integer  -- ^ Total number of business results
@@ -190,7 +195,7 @@ instance A.FromJSON SearchResult where
     parseJSON _ = mzero
 
 
--- | Suggested bounds in a map to display results in
+-- | Suggested bounds in a map to display results in.
 data Region = Region
     { regionSpan   :: CoordinateSpan -- ^ Span of suggested map bounds
     , regionCenter :: Coordinates    -- ^ Center position of map bounds
@@ -203,7 +208,7 @@ instance A.FromJSON Region where
     parseJSON _ = mzero
 
 
--- | Defines the area spanned by a map region
+-- | Defines the area spanned by a map region.
 data CoordinateSpan = CoordinateSpan
     { latitudeDelta  :: Double
     , longitudeDelta :: Double
