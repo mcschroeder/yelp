@@ -30,6 +30,13 @@ module Web.Yelp
       -- ** Response
     , Business(..)
     , Location(..)
+    , Deal(..)
+    , DealOption(..)
+    , GiftCertificate(..)
+    , Price(..)
+    , Review(..)
+    , Rating(..)
+    , User(..)
 
       -- * Common Types
     , Locale(..)

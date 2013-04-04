@@ -6,13 +6,20 @@ module Web.Yelp.Business
     , BusinessId
     , Business(..)
     , Location(..)
+    , Deal(..)
+    , DealOption(..)
+    , GiftCertificate(..)
+    , Price(..)
+    , Review(..)
+    , Rating(..)
+    , User(..)
     ) where
 
 import Control.Applicative
 import Control.Monad (mzero)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad.Trans.Resource (MonadResource)
-import Data.Aeson ((.:),(.:?))
+import Data.Aeson ((.:),(.:?),(.!=))
 import Data.Text (Text)
 
 import qualified Data.Aeson as A
@@ -37,8 +44,6 @@ getBusiness bid locale =
 type BusinessId = Text
 
 -- | A business registered on Yelp.
--- Note that at this time there is no support for 
--- deals, gift certificates or reviews
 data Business = Business 
     { -- | Yelp ID for this business
       businessId :: BusinessId
@@ -82,19 +87,8 @@ data Business = Business
       -- if a latitude/longitude is specified.
     , businessDistance :: Maybe Double
 
-      -- | Rating for this business (value ranges from 1, 1.5, ... 4.5, 5)
-    , businessRating :: Double
-
-      -- | URL to star rating image for this business (size = 84x17)
-    , businessRatingImageUrl :: Text
-
-      -- | URL to small version of rating image for this business 
-      -- (size = 50x10)
-    , businessRatingImageUrlSmall :: Text
-
-      -- | URL to large version of rating image for this business 
-      -- (size = 166x30)
-    , businessRatingImageUrlLarge :: Text
+      -- | Rating for this business
+    , businessRating :: Rating
 
       -- | Snippet text associated with this business
     , businessSnippetText :: Maybe Text
@@ -104,6 +98,14 @@ data Business = Business
 
       -- | Location data for this business
     , businessLocation :: Location
+
+      -- Deal info for this business
+    , businessDeals :: [Deal]
+
+      -- Gift certificate info for this business
+    , businessGiftCertificates :: [GiftCertificate]
+
+    , businessReviews :: [Review]
     } deriving (Show)
 
 instance A.FromJSON Business where
@@ -120,13 +122,16 @@ instance A.FromJSON Business where
                  <*> v .:  "review_count"
                  <*> v .:  "categories"
                  <*> v .:? "distance"
-                 <*> v .:  "rating"
-                 <*> v .:  "rating_img_url"
-                 <*> v .:  "rating_img_url_small"
-                 <*> v .:  "rating_img_url_large"
+                 <*> (Rating <$> v .: "rating"
+                             <*> v .: "rating_img_url"
+                             <*> v .: "rating_img_url_small"
+                             <*> v .: "rating_img_url_large")
                  <*> v .:? "snippet_text"
                  <*> v .:? "snippet_image_url"
                  <*> v .:  "location"
+                 <*> v .:? "deals" .!= []
+                 <*> v .:? "gitf_certificates" .!= []
+                 <*> v .:? "reviews" .!= []
     parseJSON _ = mzero
 
 
@@ -135,9 +140,9 @@ data Location = Location
     { locationCoordinates    :: Coordinates
     , locationAddress        :: [Text]
     , locationCity           :: Text
-    , locationStateCode      :: Text -- ^ ISO 3166-2 state code
+    , locationStateCode      :: Text  -- ^ ISO 3166-2 state code
     , locationPostalCode     :: Maybe Text      
-    , locationCountryCode    :: Text -- ^ ISO 3166-1 country code
+    , locationCountryCode    :: Text  -- ^ ISO 3166-1 country code
     , locationCrossStreets   :: Maybe Text
     , locationNeighbourhoods :: [Text]
 
@@ -163,3 +168,142 @@ instance A.FromJSON Location where
                  <*> v .:  "neighborhoods"
                  <*> v .:  "display_address"
                  <*> v .:  "geo_accuracy"
+
+
+-- | Deal data for a business
+data Deal = Deal
+    { dealId                     :: Text
+    , dealTitle                  :: Text
+    , dealUrl                    :: Text
+    , dealImageUrl               :: Text
+    , dealCurrencyCode           :: Text  -- ^ ISO 4217 Currency Code
+    , dealTimeStart              :: Integer  -- ^ Unix timestamp
+    , dealTimeEnd                :: Maybe Integer
+    , dealIsPopular              :: Bool
+    , dealWhatYouGet             :: Text  -- ^ Additional details
+    , dealImportantRestrictions  :: Maybe Text
+    , dealAdditionalRestrictions :: Text
+    , dealOptions                :: [DealOption]
+    } deriving (Show)
+
+instance A.FromJSON Deal where
+    parseJSON (A.Object v) =
+        Deal <$> v .:  "id"
+             <*> v .:  "title"
+             <*> v .:  "url"
+             <*> v .:  "image_url"
+             <*> v .:  "currency_code"
+             <*> v .:  "time_start"
+             <*> v .:? "time_end"
+             <*> v .:? "is_popular" .!= False
+             <*> v .:  "what_you_get"
+             <*> v .:? "important_restrictions"
+             <*> v .:  "additional_restrictions"
+             <*> v .:  "options"
+
+
+-- | Deal option
+data DealOption = DealOption
+    { dealOptionTitle         :: Text
+    , dealOptionPurchaseUrl   :: Text
+    , dealOptionPrice         :: Price  -- ^ Price after discount
+    , dealOptionOriginalPrice :: Price  -- ^ Price before discount
+
+      -- | The remaining deal options available for purchase
+      -- ('Nothing' if the deal is unlimited)
+    , dealOptionRemainingQuantity :: Maybe Integer
+    } deriving (Show)
+
+instance A.FromJSON DealOption where
+    parseJSON (A.Object v) =
+        DealOption <$> v .:  "title"
+                   <*> v .:  "purchase_url"
+                   <*> (Price <$> v .: "price"
+                              <*> v .: "formatted_price")
+                   <*> (Price <$> v .: "original_price"
+                              <*> v .: "formatted_original_price")
+                   <*> v .:? "remaining_count"
+
+
+data GiftCertificate = GiftCertificate
+    { giftCertificateId :: Text
+    , giftCertificateUrl :: Text
+    , giftCertificateImageUrl :: Text
+    , giftCertificateCurrencyCode :: Text  -- ^ ISO 4217 Currency Code
+
+      -- | Whether unused balances are returned as cash or store credit
+    , giftCertificateUnusedBalances :: Text
+    , giftCertificateOptions :: [Price]
+    } deriving (Show)
+
+instance A.FromJSON GiftCertificate where
+    parseJSON (A.Object v) =
+        GiftCertificate <$> v .: "id"
+                        <*> v .: "url"
+                        <*> v .: "image_url"
+                        <*> v .: "currency_code"
+                        <*> v .: "unused_balances"
+                        <*> v .: "options"
+
+
+data Price = Price
+    { price          :: Double  -- ^ Price in cents
+    , formattedPrice :: Text    -- ^ Formatted price, e.g. @$6@
+    } deriving (Show)
+
+instance A.FromJSON Price where
+    parseJSON (A.Object v) =
+        Price <$> v .: "price"
+              <*> v .: "formatted_price"
+
+
+-- | Business review
+data Review = Review
+    { reviewId          :: Text
+    , reviewRating      :: Rating
+    , reviewExcerpt     :: Text
+    , reviewTimeCreated :: Integer  -- ^ Unix timestamp
+    , reviewUser        :: User  -- ^ User who wrote the review
+    } deriving (Show)
+
+instance A.FromJSON Review where
+    parseJSON (A.Object v) =
+        Review <$> v .: "id"
+               <*> (Rating <$> v .: "rating"
+                           <*> v .: "rating_image_url"
+                           <*> v .: "rating_image_small_url"
+                           <*> v .: "rating_image_large_url")
+               <*> v .: "excerpt"
+               <*> v .: "time_created"
+               <*> v .: "user"
+
+
+-- | Rating for a business
+data Rating = Rating
+    { -- | Rating from 1-5
+      rating :: Double
+
+      -- | URL to star rating image (size = 84x17)
+    , ratingImageUrl :: Text
+      
+      -- | URL to small version of rating image (size = 50x10)
+    , ratingImageUrlSmall :: Text
+      
+      -- | URL to large version of rating image (size = 166x30)
+    , ratingImageUrlLarge :: Text
+    } deriving (Show)
+
+
+-- | Yelp user
+data User = User
+    { userId       :: Text
+    , userImageUrl :: Text
+    , userName     :: Text
+    } deriving (Show)
+
+instance A.FromJSON User where
+    parseJSON (A.Object v) =
+        User <$> v .: "id"
+             <*> v .: "image_url"
+             <*> v .: "name"
+
