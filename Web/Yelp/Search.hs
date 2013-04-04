@@ -3,6 +3,7 @@
 
 module Web.Yelp.Search
     ( search
+    , simpleSearch
     , Paging(..)
     , SortOption(..)
     , SearchFilter(..)
@@ -37,13 +38,25 @@ import Web.Yelp.Business
 import Web.Yelp.Monad
 import Web.Yelp.Types
 
+
+-- | Search for local businesses. This is a simplified version of 'search' 
+-- that only takes a natural language location and search term.
+simpleSearch :: (MonadResource m, MonadBaseControl IO m) =>
+                Text        -- ^ Location (like in 'neighbourhoodLocation')
+             -> Maybe Text  -- ^ Optional search term
+             -> YelpT m SearchResult
+simpleSearch location term =
+    search (NeighbourhoodQuery (Neighbourhood location Nothing))
+           term Nothing SortByMatch Nothing Nothing
+
+
 -- | Search for local businesses.
 search :: (MonadResource m, MonadBaseControl IO m) =>
           LocationQuery 
        -> Maybe Text        -- ^ Optional search term
        -> Maybe Paging
        -> SortOption
-       -> SearchFilter
+       -> Maybe SearchFilter
        -> Maybe Locale 
        -> YelpT m SearchResult
 search location term paging options sfilter locale =

@@ -10,6 +10,7 @@ module Web.Yelp
 
       -- * Yelp's Search API
       -- ** Request
+    , simpleSearch
     , search
     , LocationQuery(..)
     , BoundingBox(..)
