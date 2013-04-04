@@ -111,9 +111,9 @@ asBS response = lift $ H.responseBody response C.$$+- fmap B.concat CL.consume
 data YelpException 
       -- | An exception coming from Yelp.
       -- See <http://www.yelp.com/developers/documentation/v2/errors>.
-    = YelpException { exceptionText  :: Text
-                    , exceptionId    :: Text
-                    , exceptionField :: Maybe Text
+    = YelpException { exceptionText        :: Text
+                    , exceptionId          :: Text
+                    , exceptionDescription :: Text
                     }
       -- | An exception coming from the @yelp@ package's code.
     | YelpLibraryException { exceptionText :: Text }
@@ -122,9 +122,9 @@ data YelpException
 instance A.FromJSON YelpException where
     parseJSON (A.Object v) = do
         v' <- v .: "error"
-        YelpException <$> v' .:  "text"
-                      <*> v' .:  "id"
-                      <*> v' .:? "field"
+        YelpException <$> v' .: "text"
+                      <*> v' .: "id"
+                      <*> v' .: "description"
     parseJSON _ = mzero
 
 instance E.Exception YelpException
