@@ -105,7 +105,7 @@ instance A.FromJSON Business where
                  <*> v .:? "phone"
                  <*> v .:? "display_phone"
                  <*> v .:  "review_count"
-                 <*> v .:  "categories"
+                 <*> v .:? "categories" .!= []
                  <*> v .:? "distance"
                  <*> (Rating <$> v .: "rating"
                              <*> v .: "rating_img_url"
