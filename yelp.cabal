@@ -4,7 +4,7 @@
 name:                yelp
 version:             0.1.0.0
 synopsis:            Bindings for the Yelp API.
-homepage:            http://github.com/mcschroeder/yelp-haskell
+homepage:            http://github.com/mcschroeder/yelp
 license:             BSD3
 license-file:        LICENSE
 author:              Michael Schröder
@@ -12,6 +12,13 @@ maintainer:          mcschroeder@gmail.com
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.8
+
+description:
+  This package exports bindings to the Yelp v2.0 API 
+  (see <http://www.yelp.com/developers/documentation/v2/overview>). 
+  .
+  The architecture was heavily inspired by the fb package
+  (<http://hackage.haskell.org/package/fb>).
 
 extra-source-files:
   example.hs
