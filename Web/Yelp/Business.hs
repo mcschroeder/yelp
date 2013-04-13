@@ -122,7 +122,7 @@ instance A.FromJSON Business where
 
 -- | Location data for a business.
 data Location = Location
-    { locationCoordinates    :: Coordinates
+    { locationCoordinates    :: Maybe Coordinates
     , locationAddress        :: [Text]
     , locationCity           :: Text
     , locationStateCode      :: Text  -- ^ ISO 3166-2 state code
@@ -143,8 +143,8 @@ data Location = Location
 
 instance A.FromJSON Location where
     parseJSON (A.Object v) =
-        Location <$> v .:  "coordinate"
-                 <*> v .:  "address"                 
+        Location <$> v .:? "coordinate"
+                 <*> v .:? "address" .!= []
                  <*> v .:  "city"
                  <*> v .:  "state_code"
                  <*> v .:? "postal_code"
